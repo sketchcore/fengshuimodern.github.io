@@ -4,12 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FengShuiModern</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .draggable {
+            cursor: move;
+        }
+    </style>
 </head>
-<body>
-    <div id="root"></div>
-    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <script type="text/babel" src="fengshui-modern-app (1).tsx"></script>
+<body class="min-h-screen bg-gradient-to-br from-red-50 to-yellow-50 p-8 font-serif">
+    <h1 class="text-4xl text-center text-red-800 mb-8">FengShuiModern</h1>
+
+    <div id="main-content">
+        <div id="step-1">
+            <h2 class="text-2xl mb-4">Pick your Room Type!</h2>
+            <div class="flex justify-center space-x-4">
+                <button class="bg-blue-500 text-white px-4 py-2 rounded">Square</button>
+                <button class="bg-blue-500 text-white px-4 py-2 rounded">Rectangle</button>
+                <button class="bg-blue-500 text-white px-4 py-2 rounded">L-Shape</button>
+            </div>
+        </div>
+
+        <div id="step-2" style="display: none;">
+            <h2 class="text-2xl mb-4">Place Doors & Windows</h2>
+            <div id="room-container" class="relative w-full h-64 border-2 border-gray-300">
+                <!-- Room content will be added here -->
+            </div>
+            <div class="mt-4">
+                <div class="draggable bg-brown-500 w-16 h-8" draggable="true" data-type="door">Door</div>
+                <div class="draggable bg-blue-300 w-16 h-8" draggable="true" data-type="window">Window</div>
+            </div>
+        </div>
+
+        <div id="step-3" style="display: none;">
+            <h2 class="text-2xl mb-4">Place Furni</h2>
+            <div id="room-container" class="relative w-full h-64 border-2 border-gray-300">
+                <!-- Room content will be added here -->
+            </div>
+            <div class="mt-4">
+                <div class="draggable bg-gray-500 w-16 h-16" draggable="true" data-type="furniture">Furniture</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 flex justify-between">
+        <button id="prev-btn" class="bg-gray-500 text-white px-4 py-2 rounded">
+            <i data-lucide="arrow-left"></i> Previous
+        </button>
+        <button id="next-btn" class="bg-blue-500 text-white px-4 py-2 rounded">
+            Next <i data-lucide="arrow-right"></i>
+        </button>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 3;
+
+        function updateStep() {
+            for (let i = 1; i <= totalSteps; i++) {
+                document.getElementById(`step-${i}`).style.display = i === currentStep ? 'block' : 'none';
+            }
+            document.getElementById('prev-btn').disabled = currentStep === 1;
+            document.getElementById('next-btn').disabled = currentStep === totalSteps;
+        }
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStep();
+            }
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateStep();
+            }
+        });
+
+        // Basic drag and drop functionality
+        const roomContainer = document.getElementById('room-container');
+        const draggables = document.querySelectorAll('.draggable');
+
+        draggables.forEach(draggable => {
+            draggable.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', e.target.dataset.type);
+            });
+        });
+
+        roomContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        roomContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const type = e.dataTransfer.getData('text');
+            const element = document.createElement('div');
+            element.textContent = type;
+            element.style.position = 'absolute';
+            element.style.left = `${e.clientX - roomContainer.getBoundingClientRect().left}px`;
+            element.style.top = `${e.clientY - roomContainer.getBoundingClientRect().top}px`;
+            element.className = `bg-${type === 'door' ? 'brown' : type === 'window' ? 'blue' : 'gray'}-500 w-16 h-8`;
+            roomContainer.appendChild(element);
+        });
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Initial step update
+        updateStep();
+    </script>
 </body>
 </html>
