@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Feng Shui Floor Planner</title>
+    <title>FengshuiModern Free Floor Planner</title>
+    <h3>Use this to plan your space! Click here to return to the form.</h3>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -42,25 +43,22 @@
             background-color: #e0d0c0;
             box-shadow: 0 0 10px rgba(74, 55, 40, 0.1);
         }
-        .furniture, .door, .window, .rug {
+        .furniture, .door, .window {
             position: absolute;
             cursor: move;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
             user-select: none;
             border: 1px solid #6d4c41;
             box-shadow: 0 0 5px rgba(74, 55, 40, 0.2);
             transition: box-shadow 0.3s;
+            color: white;
+            font-size: 1em;
+            text-align: center;
         }
         .furniture:hover, .door:hover, .window:hover {
             box-shadow: 0 0 10px rgba(74, 55, 40, 0.4);
-        }
-        .rug {
-            z-index: -1;
-            border: 2px dashed #795548;
-            background-color: rgba(121, 85, 72, 0.2);
         }
         #furniture-list {
             display: flex;
@@ -80,16 +78,6 @@
         }
         .furniture-item:hover {
             background-color: #bcaaa4;
-        }
-        #analysis {
-            width: 500px;
-            height: 200px;
-            border: 1px solid #a1887f;
-            border-radius: 5px;
-            padding: 10px;
-            margin-top: 20px;
-            overflow-y: auto;
-            background-color: #f5e8d3;
         }
         .resize-handle {
             width: 10px;
@@ -123,7 +111,6 @@
 
         <button onclick="addDoorWindow('door')">Add Door</button>
         <button onclick="addDoorWindow('window')">Add Window</button>
-        <button onclick="analyze()">Analyze Feng Shui</button>
     </div>
 
     <div id="furniture-list">
@@ -133,17 +120,13 @@
         <div class="furniture-item" draggable="true" data-type="sofa">Sofa</div>
         <div class="furniture-item" draggable="true" data-type="tv">TV</div>
         <div class="furniture-item" draggable="true" data-type="cupboard">Cupboard</div>
-        <div class="furniture-item" draggable="true" data-type="rug">Rug</div>
     </div>
 
     <div id="room"></div>
 
-    <div id="analysis"></div>
-
     <script>
         const room = document.getElementById('room');
         const furnitureItems = document.querySelectorAll('.furniture-item');
-        const analysis = document.getElementById('analysis');
         let draggedElement = null;
         let resizingElement = null;
         let rotatingElement = null;
@@ -188,7 +171,7 @@
 
         function addFurniture(type, x, y) {
             const furniture = document.createElement('div');
-            furniture.className = type === 'door' || type === 'window' ? type : (type === 'rug' ? 'rug' : 'furniture');
+            furniture.className = type === 'door' || type === 'window' ? type : 'furniture';
             furniture.style.left = `${x}px`;
             furniture.style.top = `${y}px`;
             furniture.style.width = type === 'door' ? '10px' : '60px';
@@ -196,11 +179,9 @@
             furniture.style.backgroundColor = getColor(type);
             furniture.textContent = type;
 
-            if (type !== 'rug') {
-                const resizeHandle = document.createElement('div');
-                resizeHandle.className = 'resize-handle';
-                furniture.appendChild(resizeHandle);
-            }
+            const resizeHandle = document.createElement('div');
+            resizeHandle.className = 'resize-handle';
+            furniture.appendChild(resizeHandle);
 
             if (type === 'door' || type === 'window') {
                 const rotateHandle = document.createElement('div');
@@ -242,8 +223,7 @@
                 startAngle = Math.atan2(e.clientY - (rect.top + rect.height / 2), e.clientX - (rect.left + rect.width / 2));
             } else if (e.target.classList.contains('furniture') || 
                        e.target.classList.contains('door') || 
-                       e.target.classList.contains('window') ||
-                       e.target.classList.contains('rug')) {
+                       e.target.classList.contains('window')) {
                 draggedElement = e.target;
                 draggedElement.style.zIndex = 1000;
             }
@@ -255,6 +235,7 @@
                 const height = startHeight + e.clientY - startY;
                 resizingElement.style.width = `${Math.max(20, width)}px`;
                 resizingElement.style.height = `${Math.max(20, height)}px`;
+                resizingElement.style.fontSize = `${Math.min(width, height) / 4}px`;
             } else if (rotatingElement) {
                 const rect = rotatingElement.getBoundingClientRect();
                 const angle = Math.atan2(e.clientY - (rect.top + rect.height / 2), e.clientX - (rect.left + rect.width / 2));
@@ -280,69 +261,6 @@
             }
             resizingElement = null;
             rotatingElement = null;
-        }
-
-        function analyze() {
-            const furnitureCount = room.querySelectorAll('.furniture').length;
-            const doorCount = room.querySelectorAll('.door').length;
-            const windowCount = room.querySelectorAll('.window').length;
-            const rugCount = room.querySelectorAll('.rug').length;
-            const shape = document.getElementById('room-shape').value;
-
-            let fengShuiScore = 100;
-            let advice = "Based on our AI Feng Shui analysis:\n\n";
-
-            // Door analysis
-            if (doorCount === 0) {
-                advice += "- There's no door in your room. Every room needs at least one door for energy flow.\n";
-                fengShuiScore -= 30;
-            } else if (doorCount > 1) {
-                advice += "- Multiple doors can create conflicting energy flows. Consider reducing to one main door if possible.\n";
-                fengShuiScore -= 10 * (doorCount - 1);
-            }
-
-            // Window analysis
-            if (windowCount === 0) {
-                advice += "- No windows detected. Windows are crucial for natural light and air circulation.\n";
-                fengShuiScore -= 20;
-            } else if (windowCount > 3) {
-                advice += "- Too many windows might lead to energy dispersion. Balance is key.\n";
-                fengShuiScore -= 5 * (windowCount - 3);
-            }
-
-            // Furniture analysis
-            if (furnitureCount < 3) {
-                advice += "- The room feels empty. Add more furniture for balance and functionality.\n";
-                fengShuiScore -= 15;
-            } else if (furnitureCount > 7) {
-                advice += "- The room might be overcrowded. Consider removing some furniture for better energy flow.\n";
-                fengShuiScore -= 5 * (furnitureCount - 7);
-            }
-
-            // Rug analysis
-            if (rugCount > 0) {
-                advice += "- The rug adds warmth and defines spaces. Ensure it's proportional to the room size.\n";
-            }
-
-            // Shape analysis
-            if (shape === 'square') {
-                advice += "- Square rooms are excellent for Feng Shui as they represent stability and balance.\n";
-            } else {
-                advice += "- Rectangular rooms can be good, but ensure the length isn't more than twice the width for optimal energy flow.\n";
-            }
-
-            // General advice
-            advice += "\nGeneral tips:\n";
-            advice += "- Ensure the bed is not directly in line with the door.\n";
-            advice += "- Place the largest furniture pieces against solid walls.\n";
-            advice += "- Keep the center of the room open for energy circulation.\n";
-            advice += "- Balance the five elements: Wood, Fire, Earth, Metal, and Water in your decor.\n";
-            advice += "- Position the TV where it doesn't dominate the room's energy.\n";
-            advice += "- Use the cupboard to reduce clutter and promote positive energy flow.\n";
-
-            advice += `\nYour Feng Shui score: ${Math.max(0, fengShuiScore)}/100`;
-
-            analysis.innerHTML = advice.replace(/\n/g, '<br>');
         }
     </script>
 </body>
